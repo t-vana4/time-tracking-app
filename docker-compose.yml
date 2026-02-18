@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: timetrack
       POSTGRES_PASSWORD: timetrack_pass
@@ -15,6 +16,7 @@ services:
 
   backend:
     build: ./backend
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://timetrack:timetrack_pass@db:5432/timetracking
     depends_on:
@@ -25,6 +27,7 @@ services:
 
   frontend:
     build: ./frontend
+    restart: unless-stopped
     ports:
       - "9400:80"
     depends_on:
