@@ -76,7 +76,7 @@ export default function SuggestInput({ label, value, onChange, type, placeholder
   return (
     <div className="form-group">
       <label className="form-label">{label}</label>
-      <div className="suggest-input-wrapper" ref={wrapperRef}>
+      <div className="suggest-input-wrapper" ref={wrapperRef} onMouseLeave={() => setOpen(false)}>
         <input
           className="form-input"
           type="text"

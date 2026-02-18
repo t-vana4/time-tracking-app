@@ -86,64 +86,80 @@ export default function Report() {
   return (
     <div>
       <div className="report-controls">
-        <div className="form-group">
-          <label className="form-label">From</label>
-          <input className="form-input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label className="form-label">To</label>
-          <input className="form-input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label className="form-label">集計単位</label>
-          <select className="form-select" value={groupBy} onChange={(e) => setGroupBy(e.target.value as 'project' | 'category')}>
-            <option value="project">プロジェクト</option>
-            <option value="category">カテゴリ</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">プロジェクト</label>
-          <div className="multi-select-wrapper">
-            <button
-              className="multi-select-trigger"
-              onClick={() => { setProjectDropdownOpen(!projectDropdownOpen); setCategoryDropdownOpen(false); }}
-            >
-              {selectedProjects.length === 0 ? '全て' : `${selectedProjects.length}件選択`}
-            </button>
-            {projectDropdownOpen && (
-              <div className="multi-select-dropdown">
-                {projectOptions.map(p => (
-                  <label key={p} className="multi-select-option">
-                    <input type="checkbox" checked={selectedProjects.includes(p)} onChange={() => toggleProject(p)} />
-                    {p}
-                  </label>
-                ))}
-              </div>
-            )}
+        <div className="report-controls-row">
+          <div className="form-group">
+            <label className="form-label">From</label>
+            <input className="form-input" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">To</label>
+            <input className="form-input" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">集計単位</label>
+            <select className="form-select" value={groupBy} onChange={(e) => setGroupBy(e.target.value as 'project' | 'category')}>
+              <option value="project">プロジェクト</option>
+              <option value="category">カテゴリ</option>
+            </select>
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label">カテゴリ</label>
-          <div className="multi-select-wrapper">
-            <button
-              className="multi-select-trigger"
-              onClick={() => { setCategoryDropdownOpen(!categoryDropdownOpen); setProjectDropdownOpen(false); }}
-            >
-              {selectedCategories.length === 0 ? '全て' : `${selectedCategories.length}件選択`}
-            </button>
-            {categoryDropdownOpen && (
-              <div className="multi-select-dropdown">
-                {categoryOptions.map(c => (
-                  <label key={c} className="multi-select-option">
-                    <input type="checkbox" checked={selectedCategories.includes(c)} onChange={() => toggleCategory(c)} />
-                    {c}
-                  </label>
-                ))}
-              </div>
-            )}
+        <div className="report-controls-row">
+          <div className="form-group">
+            <label className="form-label">プロジェクト</label>
+            <div className="multi-select-wrapper" onMouseLeave={() => setProjectDropdownOpen(false)}>
+              <button
+                className="multi-select-trigger"
+                onClick={() => { setProjectDropdownOpen(!projectDropdownOpen); setCategoryDropdownOpen(false); }}
+              >
+                {selectedProjects.length === 0 ? '全て' : `${selectedProjects.length}件選択`}
+              </button>
+              {projectDropdownOpen && (
+                <div className="multi-select-dropdown">
+                  {projectOptions.map(p => (
+                    <label key={p} className="multi-select-option">
+                      <input type="checkbox" checked={selectedProjects.includes(p)} onChange={() => toggleProject(p)} />
+                      {p}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          <div className="form-group">
+            <label className="form-label">カテゴリ</label>
+            <div className="multi-select-wrapper" onMouseLeave={() => setCategoryDropdownOpen(false)}>
+              <button
+                className="multi-select-trigger"
+                onClick={() => { setCategoryDropdownOpen(!categoryDropdownOpen); setProjectDropdownOpen(false); }}
+              >
+                {selectedCategories.length === 0 ? '全て' : `${selectedCategories.length}件選択`}
+              </button>
+              {categoryDropdownOpen && (
+                <div className="multi-select-dropdown">
+                  {categoryOptions.map(c => (
+                    <label key={c} className="multi-select-option">
+                      <input type="checkbox" checked={selectedCategories.includes(c)} onChange={() => toggleCategory(c)} />
+                      {c}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {(selectedProjects.length > 0 || selectedCategories.length > 0) && (
+            <div className="form-group">
+              <label className="form-label">&nbsp;</label>
+              <button
+                className="btn btn-primary btn-reset-filters"
+                onClick={() => { setSelectedProjects([]); setSelectedCategories([]); setProjectDropdownOpen(false); setCategoryDropdownOpen(false); }}
+              >
+                フィルタをリセット
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -152,7 +168,7 @@ export default function Report() {
       {summary && (
         <>
           <div className="report-chart-wrapper">
-            <div style={{ position: 'relative', width: 500, height: 500 }}>
+            <div style={{ position: 'relative', width: 450, height: 450 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

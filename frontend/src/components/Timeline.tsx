@@ -32,6 +32,7 @@ export default function Timeline() {
   const [entries, setEntries] = useState<WorkEntry[]>([]);
   const [modalEntry, setModalEntry] = useState<WorkEntry | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [duplicateValues, setDuplicateValues] = useState<Partial<WorkEntry> | null>(null);
 
   const weekDates = useMemo(() => {
     return Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
@@ -90,7 +91,7 @@ export default function Timeline() {
           </button>
         </div>
         <span className="timeline-week-label">{weekLabel}</span>
-        <button className="btn btn-primary btn-small" onClick={() => setShowAddModal(true)}>
+        <button className="btn btn-primary btn-small" style={{ marginLeft: 'auto' }} onClick={() => setShowAddModal(true)}>
           追加
         </button>
       </div>
@@ -131,10 +132,31 @@ export default function Timeline() {
       </div>
 
       {modalEntry && (
-        <EntryModal entry={modalEntry} onClose={() => setModalEntry(null)} onSaved={loadEntries} />
+        <EntryModal
+          entry={modalEntry}
+          onClose={() => setModalEntry(null)}
+          onSaved={loadEntries}
+          onDuplicate={(e) => {
+            setModalEntry(null);
+            setDuplicateValues({
+              task_name: e.task_name,
+              project_name: e.project_name,
+              category: e.category,
+              work_date: format(new Date(), 'yyyy-MM-dd'),
+            });
+          }}
+        />
       )}
       {showAddModal && (
         <EntryModal entry={null} onClose={() => setShowAddModal(false)} onSaved={loadEntries} />
+      )}
+      {duplicateValues && (
+        <EntryModal
+          entry={null}
+          defaultValues={duplicateValues}
+          onClose={() => setDuplicateValues(null)}
+          onSaved={loadEntries}
+        />
       )}
     </div>
   );
