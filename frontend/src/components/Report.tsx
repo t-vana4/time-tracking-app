@@ -161,7 +161,7 @@ export default function Report() {
                     cy="50%"
                     innerRadius={140}
                     outerRadius={210}
-                    paddingAngle={2}
+                    paddingAngle={0}
                     dataKey="value"
                   >
                     {chartData.map((_, idx) => (

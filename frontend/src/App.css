@@ -527,7 +527,7 @@ body {
 .multi-select-trigger {
   font-family: 'Zen Old Mincho', serif;
   width: 100%;
-  min-width: 160px;
+  min-width: 230px;
   padding: 10px 14px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
@@ -573,6 +573,7 @@ body {
 /* ===== Select (dropdown) ===== */
 .form-select {
   font-family: 'Zen Old Mincho', serif;
+  min-width: 150px;
   padding: 10px 14px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);

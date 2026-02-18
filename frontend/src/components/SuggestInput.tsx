@@ -87,6 +87,8 @@ export default function SuggestInput({ label, value, onChange, type, placeholder
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
+          autoComplete="off"
+          data-1p-ignore
         />
         {open && filtered.length > 0 && (
           <div className="suggest-dropdown" ref={dropdownRef}>
