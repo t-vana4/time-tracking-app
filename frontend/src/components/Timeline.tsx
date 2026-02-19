@@ -143,6 +143,8 @@ export default function Timeline() {
               project_name: e.project_name,
               category: e.category,
               work_date: format(new Date(), 'yyyy-MM-dd'),
+              start_time: e.start_time,
+              end_time: e.end_time,
             });
           }}
         />
