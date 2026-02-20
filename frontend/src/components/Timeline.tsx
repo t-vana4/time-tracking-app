@@ -33,6 +33,8 @@ export default function Timeline() {
   const [modalEntry, setModalEntry] = useState<WorkEntry | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [duplicateValues, setDuplicateValues] = useState<Partial<WorkEntry> | null>(null);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
 
   const weekDates = useMemo(() => {
     return Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
@@ -52,14 +54,19 @@ export default function Timeline() {
     return [...new Set(entries.map(e => e.project_name))];
   }, [entries]);
 
+  const filteredEntries = useMemo(() => {
+    if (selectedProjects.length === 0) return entries;
+    return entries.filter(e => selectedProjects.includes(e.project_name));
+  }, [entries, selectedProjects]);
+
   const entriesByDate = useMemo(() => {
     const map: Record<string, WorkEntry[]> = {};
-    for (const e of entries) {
+    for (const e of filteredEntries) {
       if (!map[e.work_date]) map[e.work_date] = [];
       map[e.work_date].push(e);
     }
     return map;
-  }, [entries]);
+  }, [filteredEntries]);
 
   const hours = Array.from({ length: HOURS_END - HOURS_START + 1 }, (_, i) => HOURS_START + i);
 
@@ -72,6 +79,12 @@ export default function Timeline() {
     const height = Math.max(((bottomMin - topMin) / 60) * HOUR_HEIGHT, 18);
     const bg = getProjectColor(entry.project_name, projectNames);
     return { top: `${top}px`, height: `${height}px`, backgroundColor: bg };
+  }
+
+  function toggleProject(p: string) {
+    setSelectedProjects(prev =>
+      prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
+    );
   }
 
   const weekLabel = `${format(weekDates[0], 'yyyy/MM/dd')} - ${format(weekDates[4], 'yyyy/MM/dd')}`;
@@ -91,7 +104,27 @@ export default function Timeline() {
           </button>
         </div>
         <span className="timeline-week-label">{weekLabel}</span>
-        <button className="btn btn-primary btn-small" style={{ marginLeft: 'auto' }} onClick={() => setShowAddModal(true)}>
+        <div className="form-group" style={{ marginLeft: 'auto', marginBottom: 0 }}>
+          <div className="multi-select-wrapper" onMouseLeave={() => setProjectDropdownOpen(false)}>
+            <button
+              className="multi-select-trigger"
+              onClick={() => setProjectDropdownOpen(!projectDropdownOpen)}
+            >
+              {selectedProjects.length === 0 ? 'プロジェクト: 全て' : `プロジェクト: ${selectedProjects.length}件選択`}
+            </button>
+            {projectDropdownOpen && (
+              <div className="multi-select-dropdown">
+                {projectNames.map(p => (
+                  <label key={p} className="multi-select-option">
+                    <input type="checkbox" checked={selectedProjects.includes(p)} onChange={() => toggleProject(p)} />
+                    {p}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <button className="btn btn-primary btn-small" onClick={() => setShowAddModal(true)}>
           追加
         </button>
       </div>
