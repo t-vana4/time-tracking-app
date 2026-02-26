@@ -1,13 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { format, startOfMonth, differenceInMonths } from 'date-fns';
-import { fetchReportSummary, fetchEntries } from '../api';
+import { fetchReportSummary, fetchEntries, fetchSuggestions } from '../api';
 import type { ReportSummary } from '../types';
-
-const COLORS = [
-  '#5ec4c4', '#e8a87c', '#a897e8', '#e88a97', '#8ac4e8',
-  '#c4e85e', '#e85e8a', '#8ae8c4', '#c48ae8', '#e8c45e',
-];
+import { buildColorMap } from '../colors';
 
 function formatDuration(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
@@ -32,12 +28,19 @@ export default function Report() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [allProjects, setAllProjects] = useState<string[]>([]);
 
   const rangeValid = useMemo(() => {
     if (!from || !to) return false;
     const diff = differenceInMonths(new Date(to), new Date(from));
     return diff <= 12 && diff >= 0;
   }, [from, to]);
+
+  useEffect(() => {
+    fetchSuggestions('categories').then(setAllCategories).catch(() => {});
+    fetchSuggestions('projects').then(setAllProjects).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!from || !to || !rangeValid) return;
@@ -80,6 +83,14 @@ export default function Report() {
     name: item.name,
     value: item.seconds,
   })) || [];
+
+  const categoryColorMap = useMemo(() => buildColorMap(allCategories), [allCategories]);
+  const projectColorMap = useMemo(() => buildColorMap(allProjects), [allProjects]);
+
+  function getItemColor(name: string): string {
+    const map = groupBy === 'category' ? categoryColorMap : projectColorMap;
+    return map[name] || '#a3c4e0';
+  }
 
   const totalForPercent = chartData.reduce((acc, d) => acc + d.value, 0);
 
@@ -180,8 +191,8 @@ export default function Report() {
                     paddingAngle={0}
                     dataKey="value"
                   >
-                    {chartData.map((_, idx) => (
-                      <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                    {chartData.map((d, idx) => (
+                      <Cell key={idx} fill={getItemColor(d.name)} />
                     ))}
                   </Pie>
                 </PieChart>
@@ -207,9 +218,9 @@ export default function Report() {
           </div>
 
           <div className="report-legend">
-            {chartData.map((d, idx) => (
+            {chartData.map((d) => (
               <div key={d.name} className="report-legend-item">
-                <span className="report-legend-color" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></span>
+                <span className="report-legend-color" style={{ backgroundColor: getItemColor(d.name) }}></span>
                 {d.name} — {formatDuration(d.value)}{' '}
                 ({totalForPercent > 0 ? Math.round((d.value / totalForPercent) * 100) : 0}%)
               </div>

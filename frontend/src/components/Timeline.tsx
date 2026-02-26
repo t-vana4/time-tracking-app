@@ -1,24 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format, startOfWeek, addDays, addWeeks, subWeeks } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { fetchEntries } from '../api';
+import { fetchEntries, fetchSuggestions } from '../api';
 import type { WorkEntry } from '../types';
+import { buildColorMap } from '../colors';
 import EntryModal from './EntryModal';
 
-const HOURS_START = 6;
+const HOURS_START = 8;
 const HOURS_END = 22;
 const HOUR_HEIGHT = 50;
 const DAY_LABELS = ['月', '火', '水', '木', '金'];
-
-const PROJECT_COLORS = [
-  '#2d8a8a', '#8a6b2d', '#5e2d8a', '#8a2d5e', '#2d5e8a',
-  '#6b8a2d', '#8a2d2d', '#2d8a6b', '#5e8a2d', '#8a5e2d',
-];
-
-function getProjectColor(name: string, projectList: string[]): string {
-  const idx = projectList.indexOf(name);
-  return PROJECT_COLORS[idx % PROJECT_COLORS.length];
-}
 
 function timeToMinutes(timeStr: string): number {
   const parts = timeStr.split(':').map(Number);
@@ -35,6 +26,7 @@ export default function Timeline() {
   const [duplicateValues, setDuplicateValues] = useState<Partial<WorkEntry> | null>(null);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   const weekDates = useMemo(() => {
     return Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
@@ -48,6 +40,7 @@ export default function Timeline() {
 
   function loadEntries() {
     fetchEntries({ week_of: weekOfStr }).then(setEntries).catch(() => {});
+    fetchSuggestions('categories').then(setAllCategories).catch(() => {});
   }
 
   const projectNames = useMemo(() => {
@@ -68,6 +61,8 @@ export default function Timeline() {
     return map;
   }, [filteredEntries]);
 
+  const categoryColorMap = useMemo(() => buildColorMap(allCategories), [allCategories]);
+
   const hours = Array.from({ length: HOURS_END - HOURS_START + 1 }, (_, i) => HOURS_START + i);
 
   function getBlockStyle(entry: WorkEntry) {
@@ -77,7 +72,7 @@ export default function Timeline() {
     const bottomMin = Math.min(endMin, HOURS_END * 60) - HOURS_START * 60;
     const top = (topMin / 60) * HOUR_HEIGHT;
     const height = Math.max(((bottomMin - topMin) / 60) * HOUR_HEIGHT, 18);
-    const bg = getProjectColor(entry.project_name, projectNames);
+    const bg = categoryColorMap[entry.category] || '#a3c4e0';
     return { top: `${top}px`, height: `${height}px`, backgroundColor: bg };
   }
 
