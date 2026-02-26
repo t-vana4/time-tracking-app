@@ -1,6 +1,6 @@
 const COLORS = [
-  '#0f3b4c', '#17505f', '#207d93', '#2a9baa', '#3dbfc4',
-  '#6dcfcf', '#8ad8d8', '#a8e4e0', '#c4eee8', '#daf5f0',
+  '#2c5f72', '#548ea6', '#f38c8d', '#f2b8a2', '#f3d2b3',                                                                                                                                   
+  '#3a7a8c', '#7baabb', '#e8a0a0', '#f0c8b0', '#f5dcc5',         
 ];
 
 export function buildColorMap(names: string[]): Record<string, string> {
